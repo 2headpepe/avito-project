@@ -1,0 +1,16 @@
+.film-page__actors-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.film-page__actors-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.film-page__actors-scroll {
+    display: flex;
+    gap: 16px;
+    overflow: scroll;
+}

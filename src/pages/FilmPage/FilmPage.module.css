@@ -1,0 +1,93 @@
+.film-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.film-page__nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 12px 20px;
+    height: 60px;
+    background-color: #141414;
+    color: white;
+}
+
+.film-page__main {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 24px;
+}
+
+.film-page__head {
+    margin-top: 24px;
+    display: flex;
+    gap: 24px;
+}
+
+.film-page__head-subtitle {
+    color: #000000D9;
+    font-weight: 400;
+}
+
+.film-page__head-description {
+    margin: 24px 0px;
+}
+
+.film-page__reviews,
+.film-page__poster {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.film-page__actors-similar {
+    display: flex;
+    justify-content: space-between;
+}
+
+.film-page__actors,
+.film-page__similar {
+    width: 45%;
+}
+
+.film-page__actors-scroll {
+    display: flex;
+    gap: 16px;
+    overflow: scroll;
+}
+
+.list-item {
+    display: flex;
+    line-height: 18px;
+}
+
+.list__name {
+    color: #00000080;
+    width: 90px;
+    min-width: 180px;
+}
+
+.list__info {
+    color: #000000D9;
+}
+
+.list__icon {
+    margin-left: 4px;
+    width: 16px;
+}
+
+
+.film-page__head-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.film-page__head-ratings {
+    margin-top: 24px;
+}

@@ -1,0 +1,16 @@
+.film-page__similar-films-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.film-page__similar-films-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.film-page__similar-films-scroll {
+    display: flex;
+    gap: 16px;
+    overflow: scroll;
+}

@@ -1,0 +1,20 @@
+.filter {
+    border-right: 1px solid #00000039 !important;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.filter__type {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.menu {
+    max-height: 30vh;
+    overflow: scroll;
+}
