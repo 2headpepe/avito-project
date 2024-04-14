@@ -1,9 +1,9 @@
-import { fetchImagesPage } from "../../../lib/images/images";
-import { AppDispatch, RootState } from "../../../lib/store";
+import { fetchImagesPage } from "../../../store/images";
+import { RootState } from "../../../store/store";
 import { Carousel } from "antd";
 import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import ImageWithLoader from "../../MainPage/components/ImageWithLoader/ImageWithLoader";
+import { useAppDispatch, useAppSelector } from "../../../store/store";
 
 interface IImageCarousel {
   movieId: number;
@@ -15,8 +15,8 @@ const ImageCarousel: React.FC<IImageCarousel> = ({
   width,
   height,
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const images = useSelector((state: RootState) => state.images);
+  const dispatch = useAppDispatch();
+  const images = useAppSelector((state: RootState) => state.images);
 
   useEffect(() => {
     dispatch(fetchImagesPage({ movieId, page: images.currentPage }));
@@ -24,15 +24,19 @@ const ImageCarousel: React.FC<IImageCarousel> = ({
 
   if (!images.imagesByMovieId[movieId]) return null;
 
-  const imagesToShow = images.imagesByMovieId[movieId].map((image) => (
-    <ImageWithLoader
-      width={width}
-      height={height}
-      alt={"No image available"}
-      src={image.url}
-      key={image.url}
-    />
-  ));
+  const imagesToShow = images.imagesByMovieId[movieId].length ? (
+    images.imagesByMovieId[movieId].map((image) => (
+      <ImageWithLoader
+        width={width}
+        height={height}
+        alt={"No image available"}
+        src={image.url}
+        key={image.url}
+      />
+    ))
+  ) : (
+    <h4>Нет информации</h4>
+  );
   return <Carousel style={{ width: width }}>{imagesToShow}</Carousel>;
 };
 

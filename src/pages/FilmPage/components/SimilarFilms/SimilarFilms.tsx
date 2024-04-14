@@ -2,9 +2,10 @@ import { Pagination } from "antd";
 import styles from "./SimilarFilms.module.css";
 import React from "react";
 import { Link } from "react-router-dom";
+import { SIMILAR_FILMS_WIDTH } from "./constants";
 
-interface ISimilarFilms {
-  width: number;
+type TSimilarFilms = {
+  limit: number;
   data: {
     id: number;
     name: string;
@@ -24,29 +25,43 @@ interface ISimilarFilms {
     };
     year: number;
   }[];
-}
-const SimilarFilms: React.FC<ISimilarFilms> = ({ data, width }) => {
+};
+const SimilarFilms: React.FC<TSimilarFilms> = ({ data, limit }) => {
   const [page, setPage] = React.useState(1);
-  const limit = Math.floor(width / 116);
+  const totalPages = Math.ceil(data.length / limit) * 10;
+
+  const display = data.length > 0;
   return (
     <div className={styles["film-page__similar-films-container"]}>
       <div className={styles["film-page__similar-films-header"]}>
-        <h2>Похожие фильмы:</h2>
+        <h2>Похожие фильмы</h2>
 
-        <Pagination
-          simple
-          defaultCurrent={page}
-          onChange={(page) => setPage(page)}
-          total={Math.ceil(data.length / limit) * 10}
-        />
+        {display && (
+          <Pagination
+            simple
+            defaultCurrent={page}
+            onChange={(page) => setPage(page)}
+            total={totalPages}
+          />
+        )}
       </div>
       <ul className={styles["film-page__similar-films-scroll"]}>
-        {data.slice((page - 1) * limit, page * limit).map((film) => (
-          <Link key={film.id} style={{ width: 100 }} to={`/film/${film.id}`}>
-            <img src={film.poster.previewUrl} alt={film.name} width={100} />
-            <li>{film.name}</li>
-          </Link>
-        ))}
+        {!display && <h4>Нет информации</h4>}
+        {display &&
+          data.slice((page - 1) * limit, page * limit).map((film) => (
+            <Link
+              key={film.id}
+              style={{ width: SIMILAR_FILMS_WIDTH }}
+              to={`/film/${film.id}`}
+            >
+              <img
+                src={film.poster.previewUrl}
+                alt={film.name}
+                width={SIMILAR_FILMS_WIDTH}
+              />
+              <li>{film.name}</li>
+            </Link>
+          ))}
       </ul>
     </div>
   );

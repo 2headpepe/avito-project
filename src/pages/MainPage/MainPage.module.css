@@ -70,3 +70,24 @@
     position: relative;
     display: inline-block;
 }
+
+@media screen and (max-width:800px) {
+    .main {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main__filter {
+        position: relative;
+        top: 0px;
+        width: 100%;
+    }
+
+    .main__cards {
+        align-self: center;
+    }
+
+    .title {
+        display: none;
+    }
+}

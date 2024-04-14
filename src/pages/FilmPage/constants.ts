@@ -1,0 +1,2 @@
+export const GAP_BETWEEN_ACTORS_AND_SIMILAR = 24;
+export const FILM_POSTER_WIDTH = 300;

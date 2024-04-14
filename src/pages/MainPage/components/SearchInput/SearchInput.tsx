@@ -6,7 +6,7 @@ import styles from "./SearchInput.module.css";
 interface ISearchInputProps {
   lastQueries: string[];
   query: string;
-  setQuery: React.Dispatch<React.SetStateAction<string>>;
+  setQuery: (query: string) => void;
 }
 
 const SearchInput: React.FC<ISearchInputProps> = ({
@@ -25,10 +25,10 @@ const SearchInput: React.FC<ISearchInputProps> = ({
   return (
     <Popover
       content={reversedLastQueries
-        ?.filter((e) => e.includes(query))
-        .map((query, index) => (
+        ?.filter((e, ind, arr) => e.includes(query) && arr.indexOf(e) === ind)
+        .map((query) => (
           <div
-            key={index}
+            key={query}
             className={styles.query__container}
             onClick={() => setQuery(query)}
           >

@@ -1,20 +1,18 @@
-import { IFilm } from "../../../../lib/films/types";
+import { TFilm } from "../../../../store/films";
 import ImageWithLoader from "../ImageWithLoader/ImageWithLoader";
 import styles from "./FilmBadge.module.css";
 
-interface FilmBadgeProps {
-  data: IFilm;
+type TFilmBadgeProps = {
+  data: TFilm;
   width: number;
   height?: number;
-}
+};
 
-export const FilmBadge: React.FC<FilmBadgeProps> = ({
+export const FilmBadge: React.FC<TFilmBadgeProps> = ({
   data,
   width,
   height,
 }) => {
-  if (!data.poster.previewUrl && data.name) return null;
-
   return (
     <div className={styles.film__badge}>
       <div className={styles.image}>

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import styles from "./ImageWithLoader.module.css";
-interface IImageWithLoaderProps {
+interface TImageWithLoaderProps {
   width?: number | string;
   height?: number | string;
   alt: string;
   src: string;
   hover?: JSX.Element;
 }
-const ImageWithLoader: React.FC<IImageWithLoaderProps> = ({
+const ImageWithLoader: React.FC<TImageWithLoaderProps> = ({
   width,
   height,
   alt,

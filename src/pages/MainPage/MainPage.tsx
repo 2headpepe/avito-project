@@ -1,42 +1,58 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Pagination } from "antd";
 import styles from "./MainPage.module.css";
 import {
-  fetchFilmPage,
+  fetchFilmsPage,
+  selectAllFilms,
   setFilmLimit,
   setFilmPage,
-} from "../../lib/films/films";
-import { AppDispatch, RootState } from "../../lib/store";
+} from "../../store/films";
+import { useAppDispatch, useAppSelector } from "../../store/store";
 import SearchInput from "./components/SearchInput/SearchInput";
 import Filter from "./components/FIlter/Filter";
 import { FilmBadge } from "./components/FilmBadge/FilmBadge";
+import {
+  DEBOUNCE_TIME,
+  FILM_BADGE_HEIGHT,
+  FILM_BADGE_WIDTH,
+} from "./constants";
+import { debounce } from "./helpers";
+import { ActionType, TFilmType } from "./types";
 
-const DEBOUNCE_TIME = 1000;
-
-type FuncType<T extends unknown[]> = (...args: T) => void;
-function debounce<T extends unknown[]>(
-  func: FuncType<T>,
-  wait: number
-): FuncType<T> {
-  let timeout: ReturnType<typeof setTimeout>;
-
-  return function (this: unknown, ...args: T) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      func.apply(this, args);
-    }, wait);
-  };
-}
-type ActionType = ReturnType<typeof fetchFilmPage>;
 const MainPage = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const films = useSelector((state: RootState) => state.films);
+  const dispatch = useAppDispatch();
+  const { data, lastQueries, currentPage, totalPages, limit, status, error } =
+    useAppSelector(selectAllFilms);
 
   // Filter parameters
-  const [filterParams, setFilterParams] = useState<Record<string, string>>({});
-  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryParams = new URLSearchParams(location.search);
+  const storedSearchQuery = queryParams.get("query") || "";
+
+  const queryPage = +(queryParams.get("page") || 1);
+  const queryLimit = +(queryParams.get("limit") || 10);
+  const storedFilterParams: Record<string, string | number> = {
+    queryPage,
+    queryLimit,
+  };
+  queryParams.forEach((value, key) => {
+    if (key !== "query") {
+      storedFilterParams[key] = value;
+    }
+  });
+
+  useEffect(() => {
+    dispatch(setFilmPage(queryPage));
+    dispatch(setFilmLimit(queryLimit));
+  }, []);
+
+  const [filterParams, setFilterParams] =
+    useState<Record<string, string | number>>(storedFilterParams);
+  const [searchQuery, setSearchQuery] = useState<string>(storedSearchQuery);
 
   const debouncedDispatch = useCallback(
     debounce((action: ActionType) => dispatch(action), DEBOUNCE_TIME),
@@ -45,95 +61,120 @@ const MainPage = () => {
 
   const hasPageBeenRendered = useRef(false);
   useEffect(() => {
+    const params = new URLSearchParams();
+    Object.entries(filterParams).forEach(([key, value]) => {
+      params.append(key, value.toString());
+    });
+    if (searchQuery) params.append("query", searchQuery);
+
+    console.log(params.toString());
+
     if (!searchQuery && !hasPageBeenRendered.current) {
       dispatch(
-        fetchFilmPage({
-          page: films.currentPage,
-          limit: films.limit,
+        fetchFilmsPage({
+          page: currentPage,
+          limit: limit,
           ...filterParams,
-          type: filterParams.type !== "all" ? filterParams.type : undefined,
+          type:
+            filterParams.type !== "all"
+              ? filterParams.type?.toString()
+              : undefined,
         })
       );
     }
-  }, [dispatch, films.currentPage, films.limit, filterParams, searchQuery]);
-
-  useEffect(() => {
     if (searchQuery) {
       debouncedDispatch(
-        fetchFilmPage({
+        fetchFilmsPage({
           query: searchQuery,
-          page: films.currentPage,
-          limit: films.limit,
+          page: currentPage,
+          limit: limit,
         })
       );
       hasPageBeenRendered.current = true;
     } else if (hasPageBeenRendered.current) {
       debouncedDispatch(
-        fetchFilmPage({
-          page: films.currentPage,
-          limit: films.limit,
+        fetchFilmsPage({
+          page: currentPage,
+          limit: limit,
           ...filterParams,
-          type: filterParams.type !== "all" ? filterParams.type : undefined,
+          type:
+            filterParams.type !== "all"
+              ? filterParams.type.toString()
+              : undefined,
         })
       );
       hasPageBeenRendered.current = true;
     }
-  }, [
-    debouncedDispatch,
-    films.currentPage,
-    films.limit,
-    filterParams,
-    searchQuery,
-  ]);
+    navigate({ search: params.toString() });
+  }, [currentPage, limit, filterParams, searchQuery]);
 
   const handlePaginationChange = (page: number, pageSize: number) => {
     dispatch(setFilmPage(page));
     dispatch(setFilmLimit(pageSize));
+    setFilterParams((filterParams) => ({
+      ...filterParams,
+      queryPage: page,
+      queryLimit: pageSize,
+    }));
+  };
+  const handleFilterParamsChange = (type: TFilmType, key?: string) => {
+    dispatch(setFilmPage(1));
+    if (key) {
+      setFilterParams((current) => ({ ...current, [type]: key }));
+    } else {
+      setFilterParams((current) => ({ ...current, type }));
+    }
   };
 
+  if (error) return <div>Error</div>;
   return (
     <main className={styles.main}>
       <div className={styles.main__search}>
-        <h1>Kinopoisk Demo</h1>
+        <h1 className={styles.title}>Kinopoisk Demo</h1>
         <SearchInput
-          lastQueries={films.lastQueries}
+          lastQueries={lastQueries}
           query={searchQuery}
-          setQuery={setSearchQuery}
-        ></SearchInput>
+          setQuery={(query) => setSearchQuery(query)}
+        />
       </div>
 
       <div className={styles.main__filter}>
-        <Filter current={filterParams} setCurrent={setFilterParams}></Filter>
+        <Filter
+          current={filterParams}
+          setFilterParams={handleFilterParamsChange}
+        ></Filter>
       </div>
 
       <ul className={styles.main__cards}>
-        {films.status === "loading" &&
-          Array(films.limit).fill(
+        {status === "loading" &&
+          Array(limit).fill(
             <div className={styles["main__cards-skeleton"]}></div>
           )}
-        {films.status === "failed" && (
-          <h4 style={{ margin: "auto" }}>Error: Failed to load films</h4>
-        )}
-        {!(films.status === "loading") &&
-          films.data &&
-          films.data.map((item) => (
-            <Link to={`/film/${item.id}`} key={item.id}>
-              <FilmBadge
-                data={item}
-                width={250}
-                height={(1000 / 667) * 250}
-              ></FilmBadge>
-            </Link>
-          ))}
+        {status === "failed" && <h4>Error: Failed to load films</h4>}
+        {!(status === "loading") &&
+          data &&
+          data.map((item) => {
+            if (!item.poster.previewUrl && item.name) return null;
+
+            return (
+              <Link to={`/film/${item.id}`} key={item.id}>
+                <FilmBadge
+                  data={item}
+                  width={FILM_BADGE_WIDTH}
+                  height={FILM_BADGE_HEIGHT}
+                />
+              </Link>
+            );
+          })}
       </ul>
       <div className={styles.main__pagination}>
-        {films.status !== "loading" && films.data && (
+        {status !== "loading" && data && (
           <Pagination
-            total={films.totalPages}
+            total={totalPages}
             onChange={handlePaginationChange}
-            defaultCurrent={films.currentPage}
+            defaultCurrent={currentPage}
             className={styles.main__pagination}
-          ></Pagination>
+          />
         )}
       </div>
     </main>

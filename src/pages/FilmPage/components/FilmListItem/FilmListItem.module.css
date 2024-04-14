@@ -1,0 +1,14 @@
+.list-item {
+    display: flex;
+    line-height: 18px;
+}
+
+.list__name {
+    color: #00000080;
+    width: 90px;
+    min-width: 180px;
+}
+
+.list__info {
+    color: #000000D9;
+}

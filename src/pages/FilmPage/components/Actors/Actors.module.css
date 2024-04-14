@@ -7,6 +7,8 @@
 .film-page__actors-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    height: 28px;
 }
 
 .film-page__actors-scroll {

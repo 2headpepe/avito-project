@@ -2,3 +2,9 @@
 .main__search-input {
     width: 60vw;
 }
+
+@media screen and (max-width: 800px) {
+    .main__search-input {
+        width: 100%;
+    }
+}

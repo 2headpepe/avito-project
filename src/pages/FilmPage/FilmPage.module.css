@@ -8,13 +8,14 @@
     gap: 20px;
     align-items: center;
     position: sticky;
-    top: 0;
+    top: 0; 
     z-index: 1;
     padding: 12px 20px;
     height: 60px;
     background-color: #141414;
     color: white;
 }
+
 
 .film-page__main {
     display: flex;
@@ -46,13 +47,14 @@
 }
 
 .film-page__actors-similar {
+    margin-top: 12px;
     display: flex;
     justify-content: space-between;
 }
 
 .film-page__actors,
 .film-page__similar {
-    width: 45%;
+    width: fit-content;
 }
 
 .film-page__actors-scroll {
@@ -61,26 +63,10 @@
     overflow: scroll;
 }
 
-.list-item {
-    display: flex;
-    line-height: 18px;
-}
-
-.list__name {
-    color: #00000080;
-    width: 90px;
-    min-width: 180px;
-}
-
-.list__info {
-    color: #000000D9;
-}
-
 .list__icon {
     margin-left: 4px;
     width: 16px;
 }
-
 
 .film-page__head-info {
     display: flex;
@@ -90,4 +76,28 @@
 
 .film-page__head-ratings {
     margin-top: 24px;
+}
+
+
+
+@media screen and (max-width: 800px) {
+    .film-page__head-poster {
+        margin: auto;
+    }
+
+    .film-page__head {
+        margin-top: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .film-page__actors-similar {
+        margin-top: 12px;
+        display: block;
+    }
+
+    .film-page__similar {
+        margin-top: 12px;
+    }
 }

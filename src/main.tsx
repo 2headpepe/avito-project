@@ -1,27 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import MainPage from "./pages/MainPage/MainPage";
+import { RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
-import { store } from "./lib/store";
-import FilmPage from "./pages/FilmPage/FilmPage";
+import { store } from "./store/store";
+import { router } from "./routes";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <MainPage />,
-  },
-  {
-    path: "/film/:id",
-    element: <FilmPage />,
-  },
-]);
+import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
-      <RouterProvider router={router} />;
+      <RouterProvider router={router} />
     </Provider>
   </React.StrictMode>
 );

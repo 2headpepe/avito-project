@@ -1,8 +1,10 @@
 import { Pagination } from "antd";
 import styles from "./Actors.module.css";
 import React from "react";
-interface IActors {
-  width: number;
+import { ACTOR_WIDTH } from "./constants";
+
+type TActors = {
+  limit: number;
   data: {
     id: number;
     photo: string;
@@ -10,30 +12,35 @@ interface IActors {
     enName: string;
     description: string;
   }[];
-}
-const Actors: React.FC<IActors> = ({ width, data }) => {
-  const [page, setPage] = React.useState(1);
-  const limit = Math.floor(width / 116);
+};
 
+const Actors: React.FC<TActors> = ({ data, limit }) => {
+  const [page, setPage] = React.useState(1);
+  const totalPages = Math.ceil(data.length / limit) * 10;
+  const display = data.length > 0;
   return (
     <div className={styles["film-page__actors-container"]}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h2>Актеры:</h2>
+      <div className={styles["film-page__actors-header"]}>
+        <h2>Актеры</h2>
 
-        <Pagination
-          simple
-          defaultCurrent={page}
-          onChange={(page) => setPage(page)}
-          total={Math.ceil(data.length / limit) * 10}
-        />
+        {display && (
+          <Pagination
+            simple
+            defaultCurrent={page}
+            onChange={(page) => setPage(page)}
+            total={totalPages}
+          />
+        )}
       </div>
       <ul className={styles["film-page__actors-scroll"]}>
-        {data.slice((page - 1) * limit, page * limit).map((actor) => (
-          <div key={actor.id} style={{ width: 100 }}>
-            <img src={actor.photo} alt={actor.name} width={100} />
-            <li>{actor.name}</li>
-          </div>
-        ))}
+        {!display && <h4>Нет информации</h4>}
+        {display &&
+          data.slice((page - 1) * limit, page * limit).map((actor) => (
+            <div key={actor.id} style={{ width: ACTOR_WIDTH }}>
+              <img src={actor.photo} alt={actor.name} width={ACTOR_WIDTH} />
+              <li>{actor.name}</li>
+            </div>
+          ))}
       </ul>
     </div>
   );

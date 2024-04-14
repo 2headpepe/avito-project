@@ -1,43 +1,26 @@
-import { fetchFilmInfo } from "../../lib/filmInfo/filmInfo";
-
-import { AppDispatch, RootState } from "../../lib/store";
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
-import ImageCarousel from "./components/ImageCarousel";
-
-import UserReviews from "./components/UserReviews/UserReviews";
-import { IListItemProps } from "./types";
+import { useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
+
+import { useAppDispatch, useAppSelector } from "../../store/store";
+import { fetchFilmInfo, selectFilmInfo } from "../../store/filmInfo";
+
+import ImageCarousel from "./components/ImageCarousel";
+import UserReviews from "./components/UserReviews/UserReviews";
 import ImageWithLoader from "../MainPage/components/ImageWithLoader/ImageWithLoader";
 import Actors from "./components/Actors/Actors";
 import SimilarFilms from "./components/SimilarFilms/SimilarFilms";
 
 import styles from "./FilmPage.module.css";
-
-const ListItem: React.FC<IListItemProps> = ({
-  name,
-  value,
-  valueClassName = "list__info",
-  nameClassName = "",
-  icon,
-}) => {
-  return (
-    <div className={styles["list-item"]}>
-      <div className={`${styles.list__name} ${styles[nameClassName]}`}>
-        {name ? name + ":" : ""}
-      </div>
-      <div className={styles[valueClassName]}>{value ?? "Нет информации"}</div>
-      <div className={styles.list__icon}>{icon}</div>
-    </div>
-  );
-};
+import FilmListItem from "./components/FilmListItem/FilmListItem";
+import { FILM_POSTER_WIDTH, GAP_BETWEEN_ACTORS_AND_SIMILAR } from "./constants";
+import Seasons from "./components/Seasons/Seasons";
 
 const FilmPage = () => {
   const { id } = useParams();
-  const dispatch = useDispatch<AppDispatch>();
-  const filmInfo = useSelector((state: RootState) => state.filmInfo);
-
+  const dispatch = useAppDispatch();
+  const filmInfo = useAppSelector(selectFilmInfo);
+  const navigate = useNavigate();
   useEffect(() => {
     if (id) {
       dispatch(fetchFilmInfo(+id));
@@ -64,19 +47,33 @@ const FilmPage = () => {
   const film = filmInfo.filmById[+id];
   const width = window.innerWidth > 0 ? window.innerWidth : screen.width;
 
+  const filmPosterCarouselWidth = width < 800 ? width - 24 * 2 : undefined;
+  const filmPosterCarouselHeight = width >= 800 ? width / 4 : undefined;
+  const actorsAndFilmsLimit =
+    width < 800
+      ? (width - GAP_BETWEEN_ACTORS_AND_SIMILAR) / 116
+      : (width - GAP_BETWEEN_ACTORS_AND_SIMILAR) / 116 / 2;
+  const seriesLimit = width < 800 ? 1 : width / 216;
   return (
     <div className={styles["film-page"]}>
-      <Link className={styles["film-page__nav"]} to={"/"}>
+      <div
+        className={styles["film-page__nav"]}
+        onClick={() => navigate(-1)}
+        style={{ cursor: "pointer" }}
+      >
         <ArrowLeftOutlined />
-        <h2>Вернуться на главную</h2>
-      </Link>
+        <h2>Назад</h2>
+      </div>
       <div className={styles["film-page__main"]}>
         <div className={styles["film-page__head"]}>
-          <ImageWithLoader
-            src={film.poster.previewUrl ?? ""}
-            alt={"Нет постера"}
-            width={300}
-          />
+          <div className={styles["film-page__head-poster"]}>
+            <ImageWithLoader
+              src={film.poster.previewUrl ?? ""}
+              alt={"Нет постера"}
+              width={FILM_POSTER_WIDTH}
+            />
+          </div>
+
           <div className={styles["film-page__head-info"]}>
             <h1>{`${film?.name} (${film?.year})`}</h1>
             <h3 className={styles["film-page__head-subtitle"]}>{`${
@@ -86,8 +83,8 @@ const FilmPage = () => {
               {film?.description}
             </p>
             <div className={styles["film-page__head-info"]}>
-              <ListItem name={"Год производства"} value={film?.year} />
-              <ListItem
+              <FilmListItem name={"Год производства"} value={film?.year} />
+              <FilmListItem
                 name={"Cтраны"}
                 value={
                   film?.countries && film?.countries.length > 0
@@ -95,7 +92,7 @@ const FilmPage = () => {
                     : null
                 }
               />
-              <ListItem
+              <FilmListItem
                 name={"Жанр"}
                 value={
                   film?.genres && film?.genres.length > 0
@@ -103,35 +100,43 @@ const FilmPage = () => {
                     : null
                 }
               />
-              <ListItem name={"Слоган"} value={film?.slogan} />
-              <ListItem name={"Режиссер"} value={undefined} />
+              <FilmListItem name={"Слоган"} value={film?.slogan} />
+              <FilmListItem name={"Режиссер"} value={undefined} />
               <h4 className={styles["film-page__head-ratings"]}>Рейтинги</h4>
-              <ListItem name={"Кинопоиск"} value={film?.rating.kp} />
-              <ListItem name={"IMDB"} value={film?.rating.imdb} />
+              <FilmListItem name={"Кинопоиск"} value={film?.rating.kp} />
+              <FilmListItem name={"IMDB"} value={film?.rating.imdb} />
             </div>
           </div>
         </div>
+        {film.type === "tv-series" && (
+          <Seasons movieId={+id} seriesLimit={seriesLimit} />
+        )}
 
         <div className={styles["film-page__actors-similar"]}>
           <div className={styles["film-page__actors"]}>
-            <Actors data={film.persons} width={width / 2}></Actors>
+            <Actors data={film.persons} limit={actorsAndFilmsLimit} />
           </div>
 
           <div className={styles["film-page__similar"]}>
-            <SimilarFilms
-              data={film.similarMovies}
-              width={width / 2}
-            ></SimilarFilms>
+            {film.similarMovies && (
+              <SimilarFilms
+                data={film.similarMovies}
+                limit={actorsAndFilmsLimit}
+              />
+            )}
           </div>
         </div>
-        <div className={styles["film-page__actors"]}></div>
 
         <div className={styles["film-page__reviews"]}>
-          <UserReviews movieId={+id}></UserReviews>
+          <UserReviews movieId={+id} />
         </div>
         <div className={styles["film-page__poster"]}>
           <h2>Постеры</h2>
-          <ImageCarousel movieId={+id} height={500}></ImageCarousel>
+          <ImageCarousel
+            movieId={+id}
+            height={filmPosterCarouselHeight}
+            width={filmPosterCarouselWidth}
+          />
         </div>
       </div>
     </div>
